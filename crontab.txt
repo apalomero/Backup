@@ -1,0 +1,2 @@
+﻿#Adiciona o script "script_crontab.sh" ao crontab, #para execução automática e agendada.
+crontab script_crontab.sh

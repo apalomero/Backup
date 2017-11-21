@@ -1,0 +1,3 @@
+﻿#Essa linha irá agendar a exeução do script
+#Todos os dias as 6 horas da manhã.
+0 6 * * *  root ~/script_rsync_auto.sh

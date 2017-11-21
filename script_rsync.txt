@@ -1,0 +1,243 @@
+﻿#!/bin/bash
+
+#"Sistema de Sincronização Utilizando RSYNC"
+
+#"Alunos: Amanda Nery, Dâmaris T. O. Alexandre,"
+
+#"	  Gabriel Leal, Matheus A. M. Ribeiro '"
+
+#"11/2017"
+
+
+#"O Objetivo deste script é garantir que a pasta de destino e de origem sejam idênticas."
+
+#"Usado juntamente com o crontab, ele pode fazer sincronizações periódicas entre os diretórios escolhidos".
+
+
+
+function LER_ORIGEM_DESTINO(){
+
+#Função que lê os diretórios de destino e origem e garante que ambos sejam existentes e diferentes.
+
+
+	until [ ! "$destino" == "$origem" ]; do
+	
+#Roda continuamente toda a função até que os diretórios sejam diferentes
+
+
+		origem="";
+
+		destino="";
+
+		until [ -d "$origem" ]; do
+
+		#Roda o trecho abaixo até que o Diretório de Origem seja um diretório existente.
+
+			echo "Informe o diretório de origem:";
+
+			read origem;
+
+			echo ;
+
+	
+			if [ ! -d "$origem" ]; then
+
+			#Se o diretório for inexistente, exibe mensagem de erro e volta a ler.
+ 
+				echo;
+
+				echo "Diretório de Origem não existe!";
+
+				echo "Tente novamente.";
+
+				echo;
+	
+			fi
+
+		done
+
+		until [ -d "$destino" ]; do
+
+		#Roda o trecho abaixo até que o Diretório de Destino seja um diretório existente.
+
+			echo "Infore o diretório de destino:";
+
+			read destino;
+
+			echo;
+
+	
+			if [ ! -d "$destino" ]; then
+
+			#Se o diretório for inexistente, exibe mensagem de erro e volta a ler.
+
+				echo;
+
+				echo "Diretório de Destino não existe!";
+
+				echo "Tente novamente.";
+
+				echo;
+
+			fi
+
+		
+			if [ "$destino" == "$origem" ]; then
+
+			#Se os diretórios forem iguais, exibe mensagem de erro e volta a ler.
+
+				echo;
+
+				echo "Diretórios de Destino e Origem não podem ser iguais!";
+
+				echo "Tente novamente.";
+
+				echo;
+
+				echo;
+
+			fi
+
+		done
+
+	done
+
+}
+
+
+
+function LOG_START(){
+
+	LOG=log/`date +%Y-%m-%d_%H:%M:%S`_backup-log.txt
+
+#Cria arquivos de log com nomes sequenciais baseados na data/hora
+#E armazena eles na pasta /log/
+
+
+	INICIO=`date +%d/%m/%Y-%H:%M:%S`
+
+#Armazena o horário de início da operação em $INICIO.
+	echo "Diretório de Origem: $origem" >> $LOG
+	echo "Diretório de Destino: $destino" >> $LOG
+
+ 	echo " ------------------------------------------- " >> $LOG
+	echo "Processo de Sincronização iniciado em $INICIO" >> $LOG
+
+	echo " ------------------------------------------- " >> $LOG
+
+#Escreve no Arquivo de log o horário inicial e os diretórios de origem e destino.
+
+
+}	
+
+
+function REALIZAR_BACKUP(){
+
+	rsync -raup --stats --progress --delete --log-file=$LOG $origem/ $destino/
+
+#Opões usadas:
+
+# -r : Recursive (Copia também arquivos dentro de pastas que estiverem no diretório de origem)
+
+# -a : Archive (Mantém dados e assinatura dos arquivos [como data])
+
+# -u : Update (Não sincroniza arquivos mais antigos)
+
+# -p : Perms (Preserva as permissões dos arquivos)
+
+# --delete: Como a ideia é sincronizar duas pastas, arquivos encontrados no destino e não na origem são apagados
+
+#	    Isso garante que as pastas serão iguais
+
+#--log-file: Salva o log da sincronização no arquivo $LOG
+
+
+	echo "Sincronização efetuada com sucesso!";
+
+	echo "Pressione ENTER para continuar.";
+
+	read;
+
+}
+
+
+
+function LOG_END(){
+
+	FINAL=`date +%d/%m/%Y-%H:%M:%S`
+
+#Armazena o horário de término da operação em $FINAL.
+
+	echo " ------------------------------------------- " >> $LOG
+
+	echo "Processo de Sincronização concluído em $FINAL" >> $LOG
+ 
+#Ecreve no Arquivo de log o horário final.
+
+}
+
+
+
+function EXIBIR_LOG(){
+
+	echo ;
+
+	echo "Deseja exibir o Log da Sinconização?";
+
+	echo "Digite 1 para exibir.";
+
+	read opt;
+
+	case $opt in
+
+		1) clear; cat $LOG ; echo "Digite ENTER para continuar."; read;;
+
+#Mostra na tela o arquivo de Log caso o usuário digite 1.
+
+		*) ;;
+
+#Ou sai, caso digite outro valor.
+
+	esac
+
+}
+
+
+
+function PRINCIPAL(){
+
+#Chamada das funções.
+
+	LER_ORIGEM_DESTINO;
+
+	clear;
+
+	LOG_START;
+
+	REALIZAR_BACKUP;
+
+	LOG_END;
+
+	EXIBIR_LOG;
+
+	clear;
+
+}
+
+
+
+clear;
+
+echo " - - - SISTEMA DE BACKUP - - - ";
+
+echo ;
+
+PRINCIPAL;
+
+#Chamada de função principal.
+
+echo ;
+
+echo " - - - - FIM - - - - ";
+
+read ;

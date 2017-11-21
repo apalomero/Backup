@@ -1,0 +1,73 @@
+﻿#!/bin/bash
+#"Sistema de Sincronização Utilizando RSYNC"
+
+#"Alunos: Amanda Nery, Dâmaris T. O. Alexandre,"
+
+#"	  Gabriel Leal, Matheus A. M. Ribeiro '"
+
+#"					11/2017"
+
+
+#"O Objetivo deste script é garantir que a pasta de destino e de origem sejam idênticas."
+
+#"Usado juntamente com o crontab, ele pode fazer sincronizações periódicas entre os diretórios escolhidos."
+
+#"Este script tem funcionamento automático, juntamente com o crontab, basta definir origem e destino."
+
+
+
+origem = "diretorio_de_origem";
+
+destino = "diretorio_de_destino";
+
+#Os diretórios de destino e origem devem ser definidos pelo usuário, dentro do script, uma única vez.
+
+
+
+LOG=log/`date +%Y-%m-%d_%H:%M:%S`_backup-log.txt
+
+#Define um Arquivo de Log nomeado a partir da hora e data atual.
+
+
+INICIO=`date +%d/%m/%Y-%H:%M:%S`
+
+#Salva hora e data atual na variavel INICIO.
+
+
+echo "Processo de Sincronização iniciado em $INICIO" >> $LOG
+
+echo " ------------------------------------------- " >> $LOG
+
+#Salva no arquivo de log a data de inicio.
+
+
+
+rsync -raup --stats --progress --delete --log-file=$LOG $origem/ $destino/
+
+#Opões usadas:
+
+# -r : Recursive (Copia também arquivos dentro de pastas que estiverem no diretório de origem)
+
+# -a : Archive (Mantém dados e assinatura dos arquivos [como data])
+
+# -u : Update (Não sincroniza arquivos mais antigos)
+
+# -p : Perms (Preserva as permissões dos arquivos)
+
+# --delete: Como a ideia é sincronizar duas pastas, arquivos encontrados no destino e não na origem são apagados
+
+#	    Isso garante que as pastas serão iguais
+
+#--log-file: Salva o log da sincronização no arquivo $LOG
+
+
+FINAL=`date +%d/%m/%Y-%H:%M:%S`
+
+echo " ------------------------------------------- " >> $LOG
+
+echo "Processo de Sincronização concluído em $FINAL" >> $LOG
+
+#Repete o processo anterior para salvar o horário de finalização em log.
+
+ 
+
